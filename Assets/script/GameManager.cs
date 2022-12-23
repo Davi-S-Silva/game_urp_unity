@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
 {
 
     public static GameManager instance;
-
+    
     [SerializeField]
     private Canvas canvasPrincipal, canvasConfig, canvasCredito, canvasGame;
     [SerializeField]

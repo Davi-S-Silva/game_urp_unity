@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 #if STARTER_ASSETS_PACKAGES_CHECKED
-using Cinemachine;
+using Cinemachine; 
 #endif
 
 namespace StarterAssets
