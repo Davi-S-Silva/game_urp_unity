@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,6 +6,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -16,15 +18,17 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Canvas canvasPrincipal, canvasConfig, canvasCredito, canvasGame;
     [SerializeField]
-    private GameObject panelUmJogador, panelConfigPrincipal, panelVideo, panelGeral;
+    private GameObject panelUmJogador, panelConfigPrincipal, panelVideo, panelGeral, panelSom;
     [SerializeField]
     private InputField inputNomePlayer;
     [SerializeField]
     private AudioSource audioGame;
     [SerializeField]
+    private AudioSource[] audioEfeitos;
+    [SerializeField]
     private Slider volumeGame, volumeEfeitos;
     [SerializeField]
-    private float _vida;
+    private float _vida, _valorVolumeEfeitos;
     [SerializeField]
     private TMP_Dropdown dropDownRes;
     [SerializeField]
@@ -47,8 +51,25 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
-        audioGame.volume = PlayerPrefs.GetFloat("Audio_Game");
+        if (PlayerPrefs.HasKey("AudioGame"))
+        {
+            audioGame.volume = PlayerPrefs.GetFloat("Audio_Game");
+        }
+        else
+        {
+            audioGame.volume = 0.2f;
+        }
         volumeGame.value = PlayerPrefs.GetFloat("Volume_Game");
+
+        if (PlayerPrefs.HasKey("Volume_Efeitos"))
+        {
+            _valorVolumeEfeitos = PlayerPrefs.GetFloat("Volume_Efeitos");
+        }
+        else
+        {
+            _valorVolumeEfeitos = 0.2f;
+        }
+        BuscaAudiosEfeitosGames(_valorVolumeEfeitos);
 
 
         Debug.Log(PlayerPrefs.GetFloat("Volume_Game").ToString());
@@ -62,7 +83,13 @@ public class GameManager : MonoBehaviour
             QualityLevel = 0;
         }
         QualitySettings.SetQualityLevel(QualityLevel);
+
+        
+
+       
     }
+
+
     public float getVida()
     {
         return _vida;
@@ -185,23 +212,50 @@ public class GameManager : MonoBehaviour
         QualitySettings.SetQualityLevel(dropDownRes.value);
         Debug.Log(dropDownRes.value.ToString());
     }
+
+    public void VoltarConfigGame()
+    {
+        panelGeral.gameObject.SetActive(true);
+        panelVideo.gameObject.SetActive(false);
+        panelSom.gameObject.SetActive(false);
+    }
+
+    
     //menu som
+    public void ConfigSom()
+    {
+        panelVideo.gameObject.SetActive(false);
+        panelGeral.gameObject.SetActive(false);
+        panelSom.gameObject.SetActive(true);
+        volumeEfeitos.value = _valorVolumeEfeitos; 
+    }
 
-
+    public void SaveSomConfig()
+    {
+       configVolumeEfeitos();
+       configVolumeAmbiente();
+    }
     //som do ambiente do jogo
     private void configVolumeAmbiente()
     {
         PlayerPrefs.SetFloat("Volume_Game", volumeGame.value);
+        audioGame.volume = volumeGame.value;
     }
     private void configVolumeEfeitos()
     {
         PlayerPrefs.SetFloat("Volume_Efeitos", volumeEfeitos.value);
+        BuscaAudiosEfeitosGames(volumeEfeitos.value);
     }
-    public void confirmaConfigGame()
+    private void BuscaAudiosEfeitosGames(float volume)
     {
-        configVolumeAmbiente();
-        configVolumeEfeitos();
+        audioEfeitos = FindObjectsOfType<AudioSource>();
+        Debug.Log("Audios Sources: " + audioEfeitos.Length);
 
-        Debug.Log(PlayerPrefs.GetFloat("Volume_Game").ToString());
+        foreach (AudioSource audioEfeito in audioEfeitos)
+        {
+            audioEfeito.volume = volume;
+            Debug.Log("Audio Source nome:  " + audioEfeito.clip.name + " Volume: " + audioEfeito.volume);
+        }
     }
+   
 }
